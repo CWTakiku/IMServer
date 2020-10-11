@@ -1,11 +1,17 @@
 package domain.ack;
 
 
+import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import io.netty.channel.ChannelHandlerContext;
+import protobuf.PackProtobuf;
+import util.IdWorker;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+
+import static internal.Constants.MSG_ACK_TYPE;
+import static internal.Constants.MSG_RESULT_OK;
 
 /**
  * msg need to be processed from server
@@ -27,10 +33,10 @@ public class ProcessMsgNode {
 
     private Consumer<Message> consumer;
 
-    public ProcessMsgNode(String id,Long serial,
+    public ProcessMsgNode(String id, Long serial,
                           ChannelHandlerContext ctx, Message message, Consumer<Message> consumer) {
         this.id = id;
-        this.serial=serial;
+        this.serial = serial;
         this.ctx = ctx;
         this.message = message;
         this.consumer = consumer;
@@ -53,8 +59,13 @@ public class ProcessMsgNode {
 //                .setMsgType(Internal.InternalMsg.MsgType.ACK)
 //                .setMsgBody(id + "")
 //                .build();
-//
-         //   ctx.writeAndFlush(ack);
+            PackProtobuf.Ack ack = PackProtobuf.Ack.newBuilder()
+                    .setAckMsgId(id)
+                    .setAckType(MSG_ACK_TYPE)
+                    .setResult(MSG_RESULT_OK)
+                    .build();
+
+            ctx.writeAndFlush(ack);
         }
     }
 
@@ -70,7 +81,7 @@ public class ProcessMsgNode {
         return id;
     }
 
-    public Long getSerial(){
+    public Long getSerial() {
         return serial;
     }
 

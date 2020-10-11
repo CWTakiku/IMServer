@@ -1,7 +1,7 @@
 package po;
 
 public class UserCertification {
-    boolean result=false;
+    boolean result = false;
     String encryption;
 
     public boolean isResult() {

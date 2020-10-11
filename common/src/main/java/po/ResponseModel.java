@@ -39,13 +39,13 @@ public class ResponseModel<M> implements Serializable {
     public static final int ERROR_CREATE_MESSAGE = 3003;
 
     // 创建学校圈失败
-    public static final int ERROR_CREATE_CIRCLE= 3010;
+    public static final int ERROR_CREATE_CIRCLE = 3010;
 
     // 创建评论失败
-    public static final int ERROR_CREATE_COMMENT= 3020;
+    public static final int ERROR_CREATE_COMMENT = 3020;
 
     // 创建攻略失败
-    public static final int ERROR_CREATE_STRATEGY= 3030;
+    public static final int ERROR_CREATE_STRATEGY = 3030;
 
     // 请求参数错误
     public static final int ERROR_PARAMETERS = 4001;
@@ -68,7 +68,7 @@ public class ResponseModel<M> implements Serializable {
     //短信验证码错误
     public static final int ERROR_SMS = 2005;
 
-    public static final int VOD_AUTH=2006;
+    public static final int VOD_AUTH = 2006;
     // 没有权限操作
     public static final int ERROR_ACCOUNT_NO_PERMISSION = 2010;
 
@@ -150,6 +150,7 @@ public class ResponseModel<M> implements Serializable {
     public static <M> ResponseModel<M> buildParameterError() {
         return new ResponseModel<M>(ERROR_PARAMETERS, "Parameters Error.");
     }
+
     public static <M> ResponseModel<M> buildCodeinvalid() {
         return new ResponseModel<M>(ERROR_PARAMETERS, "sms Code invalid.");
     }
@@ -177,9 +178,11 @@ public class ResponseModel<M> implements Serializable {
     public static <M> ResponseModel<M> buildNotFoundGroupMemberError(String str) {
         return new ResponseModel<M>(ERROR_NOT_FOUND_GROUP_MEMBER, str != null ? str : "Not Found CommunityMember.");
     }
+
     public static <M> ResponseModel<M> buildNotFoundArticleError(String str) {
         return new ResponseModel<M>(ERROR_NOT_FOUND_ARTICLE, str != null ? str : "Not Found article.");
     }
+
     public static <M> ResponseModel<M> buildAccountError() {
         return new ResponseModel<M>(ERROR_ACCOUNT_TOKEN, "Account Error; you need login.");
     }
@@ -199,24 +202,31 @@ public class ResponseModel<M> implements Serializable {
     public static <M> ResponseModel<M> buildCreateError(int type) {
         return new ResponseModel<M>(type, "Create failed.");
     }
+
     public static <M> ResponseModel<M> buildVodAuthError(int type) {
         return new ResponseModel<M>(type, "VOD Auth error");
     }
+
     public static <M> ResponseModel<M> buildgetRegisterCodeError() {
         return new ResponseModel<M>(ERROR_ACCOUNT_SMS, "get sms code error");
     }
+
     public static <M> ResponseModel<M> buildgetRegisterCodeError(String message) {
         return new ResponseModel<M>(ERROR_ACCOUNT_SMS, message);
     }
+
     public static <M> ResponseModel<M> buildNoSchoolsError(String message) {
         return new ResponseModel<M>(ERROR_NOT_FOUND_Schools_MEMBER, message);
     }
+
     public static <M> ResponseModel<M> buildNoCircleError(String message) {
         return new ResponseModel<M>(ERROR_NOT_FOUND_CIRCLE_MEMBER, message);
     }
+
     public static <M> ResponseModel<M> buildNoCommentError(String message) {
         return new ResponseModel<M>(ERROR_NOT_FOUND_COMMENT_MEMBER, message);
     }
+
     public static <M> ResponseModel<M> buildSMSCodeError() {
         return new ResponseModel<M>(ERROR_SMS, "sms code error");
     }

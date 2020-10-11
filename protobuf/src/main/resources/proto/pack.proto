@@ -54,7 +54,8 @@ message Heart{ //心跳
   string userId=1;
 }
 message Ack{
-    string ackMsgId=1;
-    int32 ackType=2;
-    int32 result=3;
+       int64 serial= 1;
+       string ackMsgId = 2;
+       int32 ackType = 3;
+       int32 result = 4;
 }

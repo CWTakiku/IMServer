@@ -8,7 +8,7 @@ import po.UserCertification;
 public class UserServiceImpl implements UserService {
     @Override
     public UserCertification verifyAndGet(String userId, String token) {
-        UserCertification userCertification=new UserCertification();
+        UserCertification userCertification = new UserCertification();
         userCertification.setResult(true);
         return userCertification;
     }

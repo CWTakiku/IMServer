@@ -11,6 +11,9 @@
 	<modules>
 		<module>protobuf</module>
 		<module>common</module>
+		<module>connector</module>
+		<module>transfer</module>
+		<module>restweb</module>
 	</modules>
 	<properties>
 		<java.version>1.8</java.version>

@@ -30,6 +30,7 @@ public class ConnectorTransferHandler extends SimpleChannelInboundHandler<Messag
         ctxList.remove(ctx);
         ctx.close();
     }
+
     public static ChannelHandlerContext getOneOfTransferCtx(long time) {
         if (ctxList.size() == 0) {
             logger.warn("connector is not connected to a transfer!");
@@ -48,6 +49,7 @@ public class ConnectorTransferHandler extends SimpleChannelInboundHandler<Messag
         }
         return ctxList;
     }
+
     public void putConnectionId(ChannelHandlerContext ctx) {
         ctx.channel().attr(Conn.NET_ID).set(IdWorker.uuid());
     }

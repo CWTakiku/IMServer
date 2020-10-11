@@ -28,23 +28,25 @@ public class ZKit {
         zkClient.subscribeChildChanges(path, new IZkChildListener() {
             @Override
             public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
-                logger.info("清除/更新本地缓存 parentPath=【{}】,currentChilds=【{}】", parentPath,currentChilds.toString());
+                logger.info("清除/更新本地缓存 parentPath=【{}】,currentChilds=【{}】", parentPath, currentChilds.toString());
 
                 //更新所有缓存/先删除 再新增
-                transferCache.updateCache(currentChilds) ;
+                transferCache.updateCache(currentChilds);
             }
         });
-
     }
 
 
     /**
      * 获取所有注册节点
+     *
      * @return
      */
-    public List<String> getAllNode(){
+    public List<String> getAllNode() {
         List<String> children = zkClient.getChildren("/transfer");
-       // logger.info("查询所有节点成功=【{}】", JSON.toJSONString(children));
+        if (children != null) {
+            logger.info("查询所有节点成功=【{}】", children.toArray().toString());
+        }
         return children;
     }
 

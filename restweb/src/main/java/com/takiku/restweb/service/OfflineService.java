@@ -3,6 +3,7 @@ package com.takiku.restweb.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import po.Offline;
+import protobuf.PackProtobuf;
 
 import java.util.List;
 

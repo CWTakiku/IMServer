@@ -4,11 +4,14 @@ public class ShakeHands {
     private String userId;
     private String token;
 
-    public  ShakeHands(String userId,String token){
-        this.userId=userId;
-        this.token=token;
+    public ShakeHands(String userId, String token) {
+        this.userId = userId;
+        this.token = token;
     }
-    public ShakeHands(){}
+
+    public ShakeHands() {
+    }
+
     public String getUserId() {
         return userId;
     }

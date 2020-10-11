@@ -5,19 +5,16 @@ import com.takiku.connector.domain.ClientConnContext;
 import com.takiku.connector.handler.ConnectorTransferHandler;
 import conn.Conn;
 import domain.ack.ServerAckWindow;
-import internal.Constants;
-import internal.InternalAck;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import protobuf.PackProtobuf;
+import util.WrapWriter;
 
 import java.io.Serializable;
 import java.util.function.Function;
-
-import static internal.Constants.MSG_RESULT_OK;
 
 /**
  * process msg the connector received,
@@ -36,18 +33,21 @@ public class ConnectorToClientService {
     @Autowired
     private ClientConnContext clientConnContext;
 
-    public void doChatToClientOrTransferAndFlush(PackProtobuf.Msg msg){
-        sendMsg(msg.getHead().getToId(),msg.getHead().getMsgId(),cid-> msg);
-    }
-    public void doReplyToClientOrTransferAndFlush(PackProtobuf.Reply reply){
-
-    }
-    public void doShakeHandsToClientAndFlush(PackProtobuf.Reply reply){
-
+    public void doChatToClientOrTransferAndFlush(PackProtobuf.Msg msg) {
+        sendMsg(msg.getHead().getToId(), msg.getSerial(), cid -> msg);
     }
 
-    public boolean sendMsg(String destId, String msgId, Function<Serializable, Message> generateMsg){
+    public void doReplyToClientOrTransferAndFlush(PackProtobuf.Reply reply) {
+        logger.info("doReplyToClientOrTransferAndFlush");
+        sendMsg(reply.getUserId(), reply.getSerial(), cid -> reply);
+    }
 
+    public void doShakeHandsToClientAndFlush(PackProtobuf.Reply reply) {
+
+    }
+
+    public boolean sendMsg(String destId, Long serialId, Function<Serializable, Message> generateMsg) {
+        logger.info("sendMsg");
         Conn conn = clientConnContext.getConnByUserId(destId);
         if (conn == null) {
             ChannelHandlerContext ctx = ConnectorTransferHandler.getOneOfTransferCtx(System.currentTimeMillis());
@@ -57,7 +57,7 @@ public class ConnectorToClientService {
             //the user is connected to this machine
             //won 't save chat histories
             Message message = generateMsg.apply(conn.getNetId());
-            ServerAckWindow.offer(conn.getNetId(), msgId, message, m -> conn.getCtx().writeAndFlush(m));
+            ServerAckWindow.offer(conn.getNetId(), serialId, message, m -> WrapWriter.writeMsg(conn.getCtx(), m));
             return true;
         }
     }

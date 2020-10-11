@@ -8,9 +8,13 @@ import com.takiku.connector.handler.ConnectorTransferHandler;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import protobuf.PackProtobuf;
 
 import java.util.List;
 
+/**
+ * 用户上线、下线服务
+ */
 @Service
 public class UserOnlineService {
     @Autowired
@@ -24,14 +28,21 @@ public class UserOnlineService {
     private UserStatusService userStatusService;
 
 
-    public UserOnlineService(){
+    public UserOnlineService() {
 
     }
 
-    public ClientConn userOnline(String userId, ChannelHandlerContext ctx) {
+    /**
+     * 用户上线，将取出该用户的离线消息发送给他
+     *
+     * @param userId
+     * @param ctx
+     * @return
+     */
+    public ClientConn userOnline(String userId,String token, ChannelHandlerContext ctx) {
         //get all offline msg and send
-        List<Message> msgs = offlineService.pollOfflineMsg(userId);
-        if (msgs!=null){
+        List<Message> msgs = offlineService.pollOfflineMsg(userId,token);
+        if (msgs != null) {
             msgs.forEach(msg -> {
                 try {
                     PackProtobuf.Msg chatMsg = (PackProtobuf.Msg) msg;
@@ -56,6 +67,11 @@ public class UserOnlineService {
         return conn;
     }
 
+    /**
+     * 用户下线
+     *
+     * @param ctx
+     */
     public void userOffline(ChannelHandlerContext ctx) {
         ClientConn conn = clientConnContext.getConn(ctx);
         if (conn == null) {

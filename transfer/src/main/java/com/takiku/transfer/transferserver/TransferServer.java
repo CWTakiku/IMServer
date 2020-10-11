@@ -11,6 +11,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import protobuf.PackProtobuf;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeoutException;
 
 public class TransferServer {
     private static Logger logger = LoggerFactory.getLogger(TransferServer.class);
+
     public void startTransferServer(int port) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workGroup = new NioEventLoopGroup();
@@ -47,7 +49,8 @@ public class TransferServer {
         try {
             f.get(10, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new IMException("[transfer] start failed");
+            e.printStackTrace();
+            // throw new IMException("[transfer] start failed");
         }
     }
 }

@@ -9,10 +9,10 @@ import po.UserCertification;
  *
  * @author yrw
  */
-public interface UserService  {
+public interface UserService {
 
 
-    UserCertification verifyAndGet(String userId,String token);
+    UserCertification verifyAndGet(String userId, String token);
 
 
 }

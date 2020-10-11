@@ -22,8 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TransferCache {
 
 
-
-    private Map<String, String> cache=new ConcurrentHashMap<>();
+    private Map<String, String> cache = new ConcurrentHashMap<>();
 
     @Autowired
     private ZKit zkUtil;
@@ -45,11 +44,11 @@ public class TransferCache {
 
         for (String currentChild : currentChilds) {
             String key = currentChild.split("-")[1];
-            System.out.println("key --- "+ key);
+            System.out.println("key --- " + key);
 
-            if (cache.containsKey(key)){
+            if (cache.containsKey(key)) {
 
-            }else {
+            } else {
                 toConnectTransfer(key);
             }
             addCache(key);
@@ -57,7 +56,7 @@ public class TransferCache {
     }
 
     private void toConnectTransfer(String key) {
-        ConnectorTransfer connectorTransfer=new ConnectorTransfer();
+        ConnectorTransfer connectorTransfer = new ConnectorTransfer();
         connectorTransfer.start(key);
     }
 

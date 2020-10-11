@@ -17,16 +17,17 @@ public class AuthController {
     @Autowired
     UserService userService;
 
-        @PostMapping("/auth")
-        public ResponseModel<UserCertification> auth(@RequestBody ShakeHands shakeHands){
-            if (shakeHands!=null){
-                UserCertification userCertification=userService.verifyAndGet(shakeHands.getUserId(),shakeHands.getToken());
-                return ResponseModel.buildOk(userCertification);
-            }
-            return ResponseModel.buildServiceError();
+    @PostMapping("/auth")
+    public ResponseModel<UserCertification> auth(@RequestBody ShakeHands shakeHands) {
+        if (shakeHands != null) {
+            UserCertification userCertification = userService.verifyAndGet(shakeHands.getUserId(), shakeHands.getToken());
+            return ResponseModel.buildOk(userCertification);
         }
-        @GetMapping("/test")
-        public String test(){
-            return "jhhh";
-        }
+        return ResponseModel.buildServiceError();
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "jhhh";
+    }
 }

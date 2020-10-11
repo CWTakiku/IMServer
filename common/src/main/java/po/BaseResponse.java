@@ -43,10 +43,10 @@ public class BaseResponse<T> implements Serializable {
     // 没有权限操作
     public static final int ERROR_ACCOUNT_NO_PERMISSION = 2010;
 
-    public static final int ERROR_UOLOAD_OSS=6001;
+    public static final int ERROR_UOLOAD_OSS = 6001;
 
     //创建社团错误
-    public static final int ERROR_CREATE_COMMUNITY=6002;
+    public static final int ERROR_CREATE_COMMUNITY = 6002;
 
 
     /**
@@ -61,8 +61,9 @@ public class BaseResponse<T> implements Serializable {
     public int getCode() {
         return code;
     }
-    public boolean isSuccess(){
-        if (code==SUCCESS){
+
+    public boolean isSuccess() {
+        if (code == SUCCESS) {
             return true;
         }
         return false;

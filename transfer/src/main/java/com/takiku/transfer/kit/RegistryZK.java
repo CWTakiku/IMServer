@@ -16,7 +16,7 @@ public class RegistryZK implements Runnable {
     private ZKit zKit;
 
 
-    private ZKConfiguration zkConfiguration ;
+    private ZKConfiguration zkConfiguration;
 
     private String ip;
     private int transferPort;
@@ -24,8 +24,8 @@ public class RegistryZK implements Runnable {
     public RegistryZK(String ip, int transferPort) {
         this.ip = ip;
         this.transferPort = transferPort;
-        zKit=SpringUtil.getBean(ZKit.class);
-        zkConfiguration=SpringUtil.getBean(ZKConfiguration.class);
+        zKit = SpringUtil.getBean(ZKit.class);
+        zkConfiguration = SpringUtil.getBean(ZKConfiguration.class);
     }
 
     @Override
@@ -35,12 +35,12 @@ public class RegistryZK implements Runnable {
         zKit.createRootNode();
 
         //是否要将自己注册到 ZK
-        if (zkConfiguration.isZkSwitch()){
-            String path = zkConfiguration.getZkRoot() + "/ip-" + ip + ":" + transferPort ;
-            if (!zKit.isExits(path)){
+        if (zkConfiguration.isZkSwitch()) {
+            String path = zkConfiguration.getZkRoot() + "/ip-" + ip + ":" + transferPort;
+            if (!zKit.isExits(path)) {
                 zKit.createNode(path);
                 logger.info("注册 zookeeper 成功，msg=[{}]", path);
-            }else {
+            } else {
                 logger.info("msg=[{}] 已经存在 ", path);
             }
 

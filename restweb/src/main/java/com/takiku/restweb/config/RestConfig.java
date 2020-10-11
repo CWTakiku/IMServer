@@ -1,9 +1,11 @@
 package com.takiku.restweb.config;
 
 
+
 import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +20,6 @@ import po.ImConstant;
  */
 @Configuration
 public class RestConfig {
-
-
 
 
     @Bean

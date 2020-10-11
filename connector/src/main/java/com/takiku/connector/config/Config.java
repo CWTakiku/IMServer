@@ -35,13 +35,14 @@ public class Config {
 
     @Bean
     public ConnectorServer connectorServer() throws Exception {
-        ConnectorServer connectorServer=new ConnectorServer(port);
+        ConnectorServer connectorServer = new ConnectorServer(port);
         connectorServer.startServer();
-       return connectorServer;
+        return connectorServer;
     }
+
     @Bean
-    public ConnectorRestService connectorRestService(){
-        ConnectorRestService connectorRestService=new ConnectorRestService(restConfig.getRestUrl());
+    public ConnectorRestService connectorRestService() {
+        ConnectorRestService connectorRestService = new ConnectorRestService(restConfig.getRestUrl());
         return connectorRestService;
     }
 

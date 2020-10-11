@@ -1,7 +1,6 @@
 package com.takiku.connector.service.rest;
 
 
-
 import org.springframework.stereotype.Service;
 import po.*;
 import rest.AbstractRestService;
@@ -16,19 +15,18 @@ import java.util.List;
  */
 
 
-
 public class ConnectorRestService extends AbstractRestService<ConnectorRestClient> {
-
-
 
 
     public ConnectorRestService(String url) {
         super(ConnectorRestClient.class, url);
     }
 
-    public BaseResponse<List<Offline>>  offlines(String token) {
+    public List<Offline> offlines(String token) {
         return doRequest(() -> restClient.pollOfflineMsg(token).execute());
     }
 
-    public BaseResponse<UserCertification> certification(ShakeHands shakeHands){return doRequest(()-> restClient.auth(shakeHands).execute());}
+    public UserCertification certification(ShakeHands shakeHands) {
+        return doRequest(() -> restClient.auth(shakeHands).execute());
+    }
 }

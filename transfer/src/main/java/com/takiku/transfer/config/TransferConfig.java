@@ -51,17 +51,18 @@ public class TransferConfig {
 
     @Bean
     public TransferMqProducer TransferMqProducer() throws IOException, TimeoutException {
-         return new TransferMqProducer(rabbitmqHost,rabbitmqPort,rabbitmqUsername,rabbitmqPassword);
+        return new TransferMqProducer(rabbitmqHost, rabbitmqPort, rabbitmqUsername, rabbitmqPassword);
     }
+
     @Bean
-    public TransferServer transferServer(){
-        TransferServer transferServer=new TransferServer();
+    public TransferServer transferServer() {
+        TransferServer transferServer = new TransferServer();
         transferServer.startTransferServer(port);
         return transferServer;
     }
 
     @Bean
-    public ZkClient buildZKClient(){
+    public ZkClient buildZKClient() {
         return new ZkClient(zkConfiguration.getZkAddr(), zkConfiguration.getZkConnectTimeout());
     }
 

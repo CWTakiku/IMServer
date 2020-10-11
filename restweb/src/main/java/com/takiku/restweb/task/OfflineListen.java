@@ -12,6 +12,7 @@ import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.stereotype.Component;
 import parse.ParseService;
 import po.ImConstant;
+import protobuf.PackProtobuf;
 
 import javax.annotation.PostConstruct;
 
@@ -56,10 +57,10 @@ public class OfflineListen implements ChannelAwareMessageListener {
 //            } else {
 //                offlineService.saveReply((PackProtobuf.Reply) msg);
 //            }
-            PackProtobuf.Pack pack=PackProtobuf.Pack.parseFrom(message.getBody());
-            if (pack.getPackType()==PackProtobuf.Pack.PackType.MSG){
+            PackProtobuf.Pack pack = PackProtobuf.Pack.parseFrom(message.getBody());
+            if (pack.getPackType() == PackProtobuf.Pack.PackType.MSG) {
                 offlineService.saveChat(pack.getMsg());
-            }else {
+            } else {
                 offlineService.saveReply(pack.getReply());
             }
 

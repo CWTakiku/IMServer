@@ -13,12 +13,12 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import protobuf.PackProtobuf;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 
 
 public class ConnectorServer {
@@ -27,13 +27,14 @@ public class ConnectorServer {
 
     private volatile boolean isRunning = false;
 
-   private String port;
+    private String port;
 
 
-    public ConnectorServer(String port){
-        this.port=port;
+    public ConnectorServer(String port) {
+        this.port = port;
     }
-    private void bind(){
+
+    private void bind() {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workGroup = new NioEventLoopGroup();
 
@@ -67,7 +68,7 @@ public class ConnectorServer {
         }
     }
 
-    public  void startServer() {
+    public void startServer() {
         if (this.isRunning) {
             throw new IllegalStateException(this.getName() + " is already started .");
         }
@@ -79,6 +80,7 @@ public class ConnectorServer {
             }
         }, getName()).start();
     }
+
     private String getName() {
         return "Connector-Server";
     }

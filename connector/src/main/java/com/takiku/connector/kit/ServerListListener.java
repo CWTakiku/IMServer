@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-public class ServerListListener implements Runnable{
+public class ServerListListener implements Runnable {
 
     private static Logger logger = LoggerFactory.getLogger(ServerListListener.class);
 
@@ -17,16 +17,16 @@ public class ServerListListener implements Runnable{
     private ZKit zkUtil;
 
 
-
     private ZkConfig zkConfig;
 
     public ServerListListener() {
-      zkUtil= SpringUtil.getBean(ZKit.class);
-      zkConfig=SpringUtil.getBean(ZkConfig.class);
+        zkUtil = SpringUtil.getBean(ZKit.class);
+        zkConfig = SpringUtil.getBean(ZkConfig.class);
     }
 
     @Override
     public void run() {
+        logger.info("zkroot " + zkConfig.getZkRoot());
         zkUtil.subscribeEvent(zkConfig.getZkRoot());
     }
 }

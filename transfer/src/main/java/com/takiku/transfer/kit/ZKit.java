@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 @Component
 public class ZKit {
 
@@ -17,19 +18,19 @@ public class ZKit {
     private ZkClient zkClient;
 
     @Autowired
-    private ZKConfiguration zkConfiguration ;
+    private ZKConfiguration zkConfiguration;
 
     /**
      * 创建父级节点
      */
-    public void createRootNode(){
+    public void createRootNode() {
         boolean exists = zkClient.exists(zkConfiguration.getZkRoot());
-        if (exists){
+        if (exists) {
             return;
         }
 
         //创建 root
-        zkClient.createPersistent(zkConfiguration.getZkRoot()) ;
+        zkClient.createPersistent(zkConfiguration.getZkRoot());
     }
 
     /**
@@ -40,8 +41,9 @@ public class ZKit {
     public void createNode(String path) {
         zkClient.createEphemeral(path);
     }
-    public boolean isExits(String path){
-      return   zkClient.exists(path);
+
+    public boolean isExits(String path) {
+        return zkClient.exists(path);
     }
 
 }

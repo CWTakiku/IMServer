@@ -10,20 +10,21 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.net.InetAddress;
 
 @SpringBootApplication
-public class TransferApplication  implements CommandLineRunner {
+public class TransferApplication implements CommandLineRunner {
 
-	public static void main(String[] args) {
-		SpringApplication.run(TransferApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(TransferApplication.class, args);
+    }
 
-	@Autowired
-	private ZKConfiguration zkConfiguration ;
-	@Override
-	public void run(String... args) throws Exception {
-		//获得本机IP
-		String addr = InetAddress.getLocalHost().getHostAddress();
-		Thread thread = new Thread(new RegistryZK(addr, zkConfiguration.getTransferPort()));
-		thread.setName("registry-zk");
-		thread.start() ;
-	}
+    @Autowired
+    private ZKConfiguration zkConfiguration;
+
+    @Override
+    public void run(String... args) throws Exception {
+        //获得本机IP
+        String addr = InetAddress.getLocalHost().getHostAddress();
+        Thread thread = new Thread(new RegistryZK(addr, zkConfiguration.getTransferPort()));
+        thread.setName("registry-zk");
+        thread.start();
+    }
 }

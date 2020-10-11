@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.takiku.restweb.service.OfflineService;
 import org.springframework.stereotype.Service;
 import po.Offline;
+import protobuf.PackProtobuf;
 
 import java.util.List;
 

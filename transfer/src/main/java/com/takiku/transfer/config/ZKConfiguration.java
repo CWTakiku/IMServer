@@ -19,18 +19,18 @@ public class ZKConfiguration {
     private int transferPort;
 
     @Value("${cim.clear.route.request.url}")
-    private String clearRouteUrl ;
+    private String clearRouteUrl;
 
     @Value("${cim.heartbeat.time}")
-    private long heartBeatTime ;
-    
+    private long heartBeatTime;
+
     @Value("${app.zk.connect.timeout}")
     private int zkConnectTimeout;
-    
+
     public int getZkConnectTimeout() {
-		return zkConnectTimeout;
-	}
-    
+        return zkConnectTimeout;
+    }
+
     public String getClearRouteUrl() {
         return clearRouteUrl;
     }

@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import static util.WrapWriter.writeAck;
+
 /**
  * for client, every connection should has an ServerAckWindow
  * Date: 2019-09-08
@@ -29,6 +31,7 @@ public class ClientAckWindow {
     private final int maxSize;
 
     private AtomicBoolean first;
+    private boolean needMsgContinuous = false;
     private AtomicLong lastId;
     private ConcurrentMap<Long, ProcessMsgNode> notContinuousMap;
 
@@ -45,55 +48,71 @@ public class ClientAckWindow {
      * @param receivedMsg
      * @param processFunction
      */
-    public CompletableFuture<Void> offer(String msgId,Long serial,
+    public CompletableFuture<Void> offer(String msgId, Long serial,
                                          ChannelHandlerContext ctx, Message receivedMsg, Consumer<Message> processFunction) {
+        logger.info("serial " + serial);
         if (isRepeat(serial)) {
-            ctx.writeAndFlush(InternalAck.createAck(msgId, Constants.MSG_ACK_TYPE,Constants.MSG_RESULT_OK));
+            writeAck(ctx, msgId, Constants.MSG_ACK_TYPE, Constants.MSG_RESULT_OK);
             CompletableFuture<Void> future = new CompletableFuture<>();
             future.complete(null);
             return future;
         }
-
+        writeAck(ctx, msgId, Constants.MSG_ACK_TYPE, Constants.MSG_RESULT_OK);
         ProcessMsgNode msgNode = new ProcessMsgNode(msgId, serial, ctx, receivedMsg, processFunction);
-        if (!isContinuous(serial)) {
-            if (notContinuousMap.size() >= maxSize) {
-                CompletableFuture<Void> future = new CompletableFuture<>();
-                future.completeExceptionally(new IMException("client window is full"));
-                return future;
+        //如果需要消息连续
+        if (needMsgContinuous) {
+            if (!isContinuous(serial)) {
+                if (notContinuousMap.size() >= maxSize) {
+                    CompletableFuture<Void> future = new CompletableFuture<>();
+                    future.completeExceptionally(new IMException("client window is full"));
+                    return future;
+                }
+                notContinuousMap.put(serial, msgNode);
+                return msgNode.getFuture();
             }
-            notContinuousMap.put(serial, msgNode);
-            return msgNode.getFuture();
+        } else {
+            return processAsync(msgNode);
         }
+
         //process the msg
         return processAsync(msgNode);
     }
 
+    /**
+     * 处理消息
+     *
+     * @param node
+     * @return
+     */
     private CompletableFuture<Void> processAsync(ProcessMsgNode node) {
         return CompletableFuture
-            .runAsync(node::process)
-            .thenAccept(v -> {
-                node.sendAck();
-                node.complete();
-            })
-            .thenAccept(v -> {
-                lastId.set(node.getSerial());
-                notContinuousMap.remove(node.getId());
-            })
-            .thenComposeAsync(v -> {
-                Long nextId = nextId(node.getSerial());
-                if (notContinuousMap.containsKey(nextId)) {
-                    //there is a next msg waiting in the map
-                    ProcessMsgNode nextNode = notContinuousMap.get(nextId);
-                    return processAsync(nextNode);
-                } else {
-                    //that's the newest msg
+                .runAsync(node::process)
+                .thenAccept(v -> {
+                    //更新最新收到的消息序列号、移除放在不连续缓存的消息
+                    if (needMsgContinuous) {
+                        notContinuousMap.remove(node.getId());
+                    }
+                    lastId.set(node.getSerial());
+                })
+                .thenComposeAsync(v -> {
+                    if (needMsgContinuous) {
+                        Long nextId = nextId(node.getSerial());
+                        if (notContinuousMap.containsKey(nextId)) {
+                            //there is a next msg waiting in the map
+                            ProcessMsgNode nextNode = notContinuousMap.get(nextId);
+                            return processAsync(nextNode);
+                        } else {
+                            //that's the newest msg
+                            return node.getFuture();
+                        }
+                    }
                     return node.getFuture();
-                }
-            })
-            .exceptionally(e -> {
-                logger.error("[process received msg] has error", e);
-                return null;
-            });
+                })
+                .exceptionally(e -> {
+                    e.printStackTrace();
+                    logger.error("[process received msg] has error", e.getMessage());
+                    return null;
+                });
     }
 
 

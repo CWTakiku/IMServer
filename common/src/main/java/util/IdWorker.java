@@ -47,6 +47,6 @@ public class IdWorker {
      */
     public static Long nextId(Serializable connectorId) {
         return sessionMap.computeIfAbsent(connectorId,
-            key -> new AtomicLong(0)).incrementAndGet();
+                key -> new AtomicLong(0)).incrementAndGet();
     }
 }
