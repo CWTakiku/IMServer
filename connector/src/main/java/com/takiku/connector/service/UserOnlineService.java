@@ -5,11 +5,16 @@ import com.google.protobuf.Message;
 import com.takiku.connector.domain.ClientConn;
 import com.takiku.connector.domain.ClientConnContext;
 import com.takiku.connector.handler.ConnectorTransferHandler;
+import com.takiku.userstatus.service.UserStatusService;
+import com.takiku.connector.service.impl.RedisUserStatusServiceImpl;
+import domain.ack.ServerAckWindow;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import protobuf.PackProtobuf;
+import util.WrapWriter;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -24,12 +29,17 @@ public class UserOnlineService {
     @Autowired
     private OfflineService offlineService;
 
-    @Autowired
+
     private UserStatusService userStatusService;
 
+    private ServerAckWindow serverAckWindow;
+
+    public ServerAckWindow getServerAckWindow() {
+        return serverAckWindow;
+    }
 
     public UserOnlineService() {
-
+        userStatusService = new RedisUserStatusServiceImpl();
     }
 
     /**
@@ -41,19 +51,23 @@ public class UserOnlineService {
      */
     public ClientConn userOnline(String userId,String token, ChannelHandlerContext ctx) {
         //get all offline msg and send
+        ClientConn conn = new ClientConn(ctx);
+        serverAckWindow = new ServerAckWindow(conn.getNetId(), 10, Duration.ofSeconds(5));
         List<Message> msgs = offlineService.pollOfflineMsg(userId,token);
         if (msgs != null) {
             msgs.forEach(msg -> {
                 try {
                     PackProtobuf.Msg chatMsg = (PackProtobuf.Msg) msg;
-                    connectorToClientService.doChatToClientOrTransferAndFlush(chatMsg);
+                    ServerAckWindow.offer(conn.getNetId(), ((PackProtobuf.Msg) msg).getSerial(), chatMsg, m -> WrapWriter.writeMsg(conn.getCtx(), m));
+                  //  WrapWriter.writeMsg(ctx,chatMsg);
+                  //  connectorToClientService.doChatToClientOrTransferAndFlush(chatMsg);
                 } catch (ClassCastException ex) {
                 }
             });
 
         }
         //save connection
-        ClientConn conn = new ClientConn(ctx);
+
         conn.setUserId(userId);
         clientConnContext.addConn(conn);
 

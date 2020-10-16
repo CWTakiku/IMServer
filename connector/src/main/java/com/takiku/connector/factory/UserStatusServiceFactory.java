@@ -1,7 +1,7 @@
 package com.takiku.connector.factory;
 
 
-import com.takiku.connector.service.UserStatusService;
+import com.takiku.userstatus.service.UserStatusService;
 
 import java.util.Properties;
 

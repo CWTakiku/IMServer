@@ -3,6 +3,7 @@ package com.takiku.connector.domain;
 
 import com.google.inject.Singleton;
 import conn.MemoryConnContext;
+import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,10 +26,12 @@ public class ClientConnContext extends MemoryConnContext<ClientConn> {
     private static final Logger logger = LoggerFactory.getLogger(ClientConnContext.class);
 
     private ConcurrentMap<String, Serializable> userIdToNetId;
+    private ConcurrentMap<ChannelHandlerContext,Serializable> ctxToNetId;
 
     public ClientConnContext() {
         this.connMap = new ConcurrentHashMap<>();
         this.userIdToNetId = new ConcurrentHashMap<>();
+        this.ctxToNetId = new ConcurrentHashMap<>();
     }
 
     public ClientConn getConnByUserId(String userId) {
@@ -48,6 +51,21 @@ public class ClientConnContext extends MemoryConnContext<ClientConn> {
         }
         return conn;
     }
+    public ClientConn getConnByCtx(ChannelHandlerContext ctx){
+        Serializable netId = ctxToNetId.get(ctx);
+        if (netId == null) {
+            logger.debug("[get conn this machine] netId not found getConnByCtx ");
+            return null;
+        }
+        ClientConn conn = connMap.get(netId);
+        if (conn == null) {
+            logger.info("[get conn this machine] conn not found");
+            ctxToNetId.remove(ctx);
+        } else {
+            logger.info("[get conn this machine] found conn, getConnByCtx, connId: {}",  conn.getNetId());
+        }
+        return conn;
+    }
 
     @Override
     public void addConn(ClientConn conn) {
@@ -60,6 +78,7 @@ public class ClientConnContext extends MemoryConnContext<ClientConn> {
 
         connMap.putIfAbsent(conn.getNetId(), conn);
         userIdToNetId.put(conn.getUserId(), conn.getNetId());
+        ctxToNetId.put(conn.getCtx(),conn.getNetId());
 
     }
 }

@@ -1,10 +1,12 @@
 package com.takiku.transfer.mqproducer;
 
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Message;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import po.ImConstant;
+import protobuf.PackProtobuf;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -33,16 +35,15 @@ public class TransferMqProducer {
         logger.info("[transfer] producer start success");
     }
 
-    public void basicPublish(String exchange, String routingKey, AMQP.BasicProperties properties, GeneratedMessageV3 message) throws IOException {
-//        PackProtobuf.Pack pack= (PackProtobuf.Pack) message;
-//
-//        byte[] srcB = message.toByteArray();
-//        byte[] destB = new byte[srcB.length + 1];
-//        destB[0] = (byte) code;
-//
-//        System.arraycopy(message.toByteArray(), 0, destB, 1, message.toByteArray().length);
+    public void basicPublish(String exchange, String routingKey, AMQP.BasicProperties properties, int code,Message message) throws IOException {
 
-        channel.basicPublish(exchange, routingKey, properties, message.toByteArray());
+        byte[] srcB = message.toByteArray();
+        byte[] destB = new byte[srcB.length + 1];
+        destB[0] = (byte) code;
+
+        System.arraycopy(message.toByteArray(), 0, destB, 1, message.toByteArray().length);
+
+        channel.basicPublish(exchange, routingKey, properties, destB);
     }
 
     public Channel getChannel() {

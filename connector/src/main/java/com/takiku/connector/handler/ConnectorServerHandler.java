@@ -34,7 +34,6 @@ import static internal.Constants.SHAKE_HANDS_STATUS_SUCCESS;
 /**
  * 处理客户端的消息
  */
-@ChannelHandler.Sharable
 @Component
 public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message> {
     private static Logger logger = LoggerFactory.getLogger(ConnectorServerHandler.class);
@@ -99,10 +98,9 @@ public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message>
             register(PackProtobuf.ShakeHands.class, ((m, channelHandlerContext) -> {
                 if (auth(m)) {
                     logger.info("userOnline");
-                    ClientConn conn = userOnlineService.userOnline(m.getUserId(),m.getToken(), channelHandlerContext);
-                    serverAckWindow = new ServerAckWindow(conn.getNetId(), 10, Duration.ofSeconds(5));
+                    userOnlineService.userOnline(m.getUserId(),m.getToken(), channelHandlerContext);
                     clientAckWindow = new ClientAckWindow(5);
-                    channelHandlerContext.writeAndFlush(InternalAck.createAck(m.getMsgId(), SHAKE_HANDS_ACK_TYPE, SHAKE_HANDS_STATUS_SUCCESS));
+                    channelHandlerContext.writeAndFlush(InternalAck.createAck(m.getMsgId()));
                 }
             }));
 
@@ -119,7 +117,7 @@ public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message>
                     AckHeart(channelHandlerContext, m)));
 
             register(PackProtobuf.Ack.class, ((m, channelHandlerContext) -> {
-                serverAckWindow.ack(m);
+                     connectorToClientService.doAck(channelHandlerContext,m);
             }));
         }
     }
@@ -142,7 +140,7 @@ public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message>
             //TODO 加密
             return true;
         }
-        return true;
+        return false;
     }
 
     private void AckHeart(ChannelHandlerContext ctx, PackProtobuf.Heart heart) {

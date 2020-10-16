@@ -22,8 +22,8 @@ import java.util.List;
  */
 public interface ConnectorRestClient {
 
-    @GET("api/offline/poll/{id}")
-    Call<BaseResponse<List<Offline>>> pollOfflineMsg(@Path("id") String userId);
+    @GET("api/offline/poll/{userId}")
+    Call<BaseResponse<List<Offline>>> pollOfflineMsg(@Path("userId") String userId);
 
     @POST("api/user/auth")
     Call<BaseResponse<UserCertification>> auth(@Body ShakeHands shakeHands);

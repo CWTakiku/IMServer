@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class ServerAckWindow {
     private static Logger logger = LoggerFactory.getLogger(ServerAckWindow.class);
     private static Map<Serializable, ServerAckWindow> windowsMap;
-    private ConcurrentHashMap<Long, ResponseCollector<PackProtobuf.Ack>> responseCollectorMap;
+    private volatile ConcurrentHashMap<Long, ResponseCollector<PackProtobuf.Ack>> responseCollectorMap;
     private static ExecutorService executorService;
     private final Duration timeout;
     private final int maxSize;
@@ -30,6 +30,7 @@ public class ServerAckWindow {
     private static void checkTimeoutAndRetry() {
         while (true) {
             for (ServerAckWindow window : windowsMap.values()) {
+                // logger.info(window.responseCollectorMap.size()+" "+window.responseCollectorMap.toString());
                 window.responseCollectorMap.entrySet().stream()
                         .filter(entry -> window.timeout(entry.getValue()))
                         .forEach(entry -> window.retry(entry.getKey(), entry.getValue()));
@@ -47,7 +48,7 @@ public class ServerAckWindow {
         this.responseCollectorMap = new ConcurrentHashMap<>();
         this.timeout = timeout;
         this.maxSize = maxSize;
-
+        logger.info("ServerAckWindow " + connectionId);
         windowsMap.put(connectionId, this);
     }
 
@@ -60,6 +61,7 @@ public class ServerAckWindow {
      * @return
      */
     public static CompletableFuture<PackProtobuf.Ack> offer(Serializable connectionId, Long serialId, Message sendMessage, Consumer<Message> sendFunction) {
+        logger.info("connectionId " + connectionId);
         return windowsMap.get(connectionId).offer(serialId, sendMessage, sendFunction);
     }
 
@@ -78,15 +80,22 @@ public class ServerAckWindow {
         ResponseCollector<PackProtobuf.Ack> responseCollector = new ResponseCollector<>(sendMessage, sendFunction);
         responseCollector.send();
         responseCollectorMap.put(serialId, responseCollector);
+
         return responseCollector.getFuture();
     }
 
-    public void ack(Message message) {
+    public static void ack(Serializable connectionId, Message message) {
         Long id = ((PackProtobuf.Ack) message).getSerial();
-        logger.info("get ack, msg: {}", id);
-        if (responseCollectorMap.containsKey(id)) {
-            responseCollectorMap.get(id).getFuture().complete((PackProtobuf.Ack) message);
-            responseCollectorMap.remove(id);
+        ServerAckWindow serverAckWindow = windowsMap.get(connectionId);
+        if (serverAckWindow != null) {
+            ConcurrentHashMap<Long, ResponseCollector<PackProtobuf.Ack>> responseCollectorMap = serverAckWindow.responseCollectorMap;
+            logger.info("get ack, msg: {}", id);
+            if (responseCollectorMap.containsKey(id)) {
+                responseCollectorMap.get(id).getFuture().complete((PackProtobuf.Ack) message);
+                responseCollectorMap.remove(id);
+            } else {
+                logger.info(" size " + responseCollectorMap.size() + responseCollectorMap.toString());
+            }
         }
     }
 
@@ -95,7 +104,7 @@ public class ServerAckWindow {
     }
 
     private void retry(Long id, ResponseCollector<?> collector) {
-        logger.debug("retry msg: {}", id);
+        logger.info("retry msg: {}", id);
         //todo: if offline
         collector.send();
     }

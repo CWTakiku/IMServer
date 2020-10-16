@@ -1,8 +1,9 @@
-package com.takiku.connector.service.impl;
+package com.takiku.transfer.service;
 
 
 
-import com.takiku.connector.config.RedisUtil;
+
+import com.takiku.transfer.config.RedisUtil;
 import com.takiku.userstatus.service.UserStatusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

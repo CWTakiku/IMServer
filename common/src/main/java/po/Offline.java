@@ -6,15 +6,15 @@ package po;
  *
  * @author yrw
  */
-public class Offline extends DbModel {
+public class Offline  {
 
-    private Long msgId;
+    private String msgId;
 
     private Integer msgCode;
 
     private String toUserId;
 
-    private byte[] content;
+    private String content;
 
     private Boolean hasRead;
 
@@ -26,11 +26,11 @@ public class Offline extends DbModel {
         this.hasRead = hasRead;
     }
 
-    public Long getMsgId() {
+    public String getMsgId() {
         return msgId;
     }
 
-    public void setMsgId(Long msgId) {
+    public void setMsgId(String msgId) {
         this.msgId = msgId;
     }
 
@@ -50,11 +50,11 @@ public class Offline extends DbModel {
         this.toUserId = toUserId;
     }
 
-    public byte[] getContent() {
+    public String getContent() {
         return content;
     }
 
-    public void setContent(byte[] content) {
+    public void setContent(String content) {
         this.content = content;
     }
 }

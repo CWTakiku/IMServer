@@ -18,7 +18,7 @@ public class WrapWriter {
         }
         PackProtobuf.Pack pack = null;
         if (message instanceof PackProtobuf.Msg) {
-            logger.info("msg");
+            logger.info("Serial id: "+((PackProtobuf.Msg) message).getSerial()+" msg: "+((PackProtobuf.Msg) message).getBody());
             pack = PackProtobuf.Pack.newBuilder()
                     .setPackType(PackProtobuf.Pack.PackType.MSG)
                     .setMsg((PackProtobuf.Msg) message)
@@ -41,6 +41,8 @@ public class WrapWriter {
                 .build();
         ctx.writeAndFlush(pack);
     }
+
+
 
     public static void writeAckHeart(ChannelHandlerContext ctx, PackProtobuf.Heart heart) {
         PackProtobuf.Pack pack = PackProtobuf.Pack.newBuilder()

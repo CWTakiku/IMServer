@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import parse.ParseService;
 import po.BaseResponse;
 import po.Offline;
+import util.BytesUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -44,12 +45,18 @@ public class OfflineService {
      * @return
      */
     public List<Message> pollOfflineMsg(String userId,String token) {
-        List<Offline> msgs = connectorRestService.offlines(token);
-        if (msgs!=null){
+        List<Offline> msgs = connectorRestService.offlines(userId);
+        System.out.println("pollOfflineMsg ");
+        if (msgs!=null&&msgs.size()>0){
+            System.out.println("pollOfflineMsg "+msgs.size());
             return msgs.stream()
                     .map(o -> {
                         try {
-                            return parseService.getMsgByCode(o.getMsgCode(), o.getContent());
+                            System.out.println("bytes "+ o.getContent());
+                           // String hex = o.getContent();
+                         //   System.out.println("bytes hexStr"+ hex);
+                           // System.out.println("bytes bytes "+ BytesUtil.hexStr2bytes(o.getContent())[0]+" size "+BytesUtil.hexStr2bytes(o.getContent()).length);
+                            return parseService.getMsgByCode(o.getMsgCode(),o.getContent().getBytes());
                         } catch (InvalidProtocolBufferException e) {
                             e.printStackTrace();
                         }

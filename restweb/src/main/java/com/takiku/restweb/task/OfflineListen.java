@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import parse.ParseService;
 import po.ImConstant;
 import protobuf.PackProtobuf;
+import util.BytesUtil;
 
 import javax.annotation.PostConstruct;
 
@@ -46,22 +47,18 @@ public class OfflineListen implements ChannelAwareMessageListener {
         logger.info("[OfflineConsumer] getUserSpi msg: {}", message.toString());
         try {
 //
-//            int code = message.getBody()[0];
-//
-//            byte[] msgBody = new byte[message.getBody().length - 1];
-//            System.arraycopy(message.getBody(), 1, msgBody, 0, message.getBody().length - 1);
-
-//            com.google.protobuf.Message msg = parseService.getMsgByCode(code, msgBody);
-//            if (code == PackProtobuf.Pack.PackType.MSG.getNumber()) {
-//                offlineService.saveChat((PackProtobuf.Msg) msg);
-//            } else {
-//                offlineService.saveReply((PackProtobuf.Reply) msg);
-//            }
-            PackProtobuf.Pack pack = PackProtobuf.Pack.parseFrom(message.getBody());
-            if (pack.getPackType() == PackProtobuf.Pack.PackType.MSG) {
-                offlineService.saveChat(pack.getMsg());
+        //    logger.info("[OfflineConsumer] size "+message.getBody().length);
+            int code = message.getBody()[0];
+          //  logger.info("[OfflineConsumer] code: {}", code);
+            byte[] msgBody = new byte[message.getBody().length - 1];
+            System.arraycopy(message.getBody(), 1, msgBody, 0, message.getBody().length - 1);
+            logger.info("hex"+ BytesUtil.bytes2hexStr(msgBody));
+            logger.info("bytes "+msgBody[0]+" size "+msgBody.length);
+            com.google.protobuf.Message msg = parseService.getMsgByCode(code, msgBody);
+            if (code == PackProtobuf.Pack.PackType.MSG.getNumber()) {
+                offlineService.saveChat((PackProtobuf.Msg) msg);
             } else {
-                offlineService.saveReply(pack.getReply());
+                offlineService.saveReply((PackProtobuf.Reply) msg);
             }
 
         } catch (Exception e) {

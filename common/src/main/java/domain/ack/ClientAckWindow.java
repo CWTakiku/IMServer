@@ -50,7 +50,7 @@ public class ClientAckWindow {
      */
     public CompletableFuture<Void> offer(String msgId, Long serial,
                                          ChannelHandlerContext ctx, Message receivedMsg, Consumer<Message> processFunction) {
-        logger.info("serial " + serial);
+        logger.info("client serial " + serial);
         if (isRepeat(serial)) {
             writeAck(ctx, msgId, Constants.MSG_ACK_TYPE, Constants.MSG_RESULT_OK);
             CompletableFuture<Void> future = new CompletableFuture<>();

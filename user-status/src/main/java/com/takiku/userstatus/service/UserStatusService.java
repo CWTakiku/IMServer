@@ -1,4 +1,4 @@
-package com.takiku.transfer.service;
+package com.takiku.userstatus.service;
 
 /**
  * Date: 2019-06-09
