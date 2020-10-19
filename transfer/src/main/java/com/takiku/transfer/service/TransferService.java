@@ -24,7 +24,7 @@ public class TransferService {
     private TransferMqProducer producer;
     private static Logger logger = LoggerFactory.getLogger(TransferService.class);
     public void doChat(PackProtobuf.Msg msg) throws IOException {
-        logger.info("doChat "+msg.getHead().getToId()+"  content "+msg.getBody());
+       // logger.info("doChat "+msg.getHead().getToId()+"  content "+msg.getBody());
         ConnectorConn conn = connContext.getConnByUserId(msg.getHead().getToId());
 
         if (conn != null) {
@@ -35,7 +35,7 @@ public class TransferService {
     }
 
     private void doOffline(int type,Message msg) throws IOException {
-        logger.info("doOffline");
+       // logger.info("doOffline");
         producer.basicPublish(ImConstant.MQ_EXCHANGE, ImConstant.MQ_ROUTING_KEY,
                 MessageProperties.PERSISTENT_TEXT_PLAIN, type,msg);
     }

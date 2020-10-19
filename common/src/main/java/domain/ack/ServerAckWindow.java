@@ -86,10 +86,11 @@ public class ServerAckWindow {
 
     public static void ack(Serializable connectionId, Message message) {
         Long id = ((PackProtobuf.Ack) message).getSerial();
+        logger.info("get ack, msg: {}", id+" connectionId "+connectionId);
         ServerAckWindow serverAckWindow = windowsMap.get(connectionId);
         if (serverAckWindow != null) {
             ConcurrentHashMap<Long, ResponseCollector<PackProtobuf.Ack>> responseCollectorMap = serverAckWindow.responseCollectorMap;
-            logger.info("get ack, msg: {}", id);
+
             if (responseCollectorMap.containsKey(id)) {
                 responseCollectorMap.get(id).getFuture().complete((PackProtobuf.Ack) message);
                 responseCollectorMap.remove(id);

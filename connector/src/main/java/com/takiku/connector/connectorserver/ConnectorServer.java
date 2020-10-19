@@ -3,7 +3,7 @@ package com.takiku.connector.connectorserver;
 import code.MsgDecoder;
 import code.MsgEncoder;
 import com.takiku.connector.exception.ImException;
-import com.takiku.connector.handler.ConnectorServerHandler;
+import com.takiku.connector.handler.ConnectorClientHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -50,7 +50,7 @@ public class ConnectorServer {
                                 0, 2, 0, 2));
                         pipeline.addLast("MsgDecoder", new MsgDecoder(PackProtobuf.Pack.getDefaultInstance()));
                         pipeline.addLast("MsgEncoder", new MsgEncoder());
-                        pipeline.addLast("ConnectorServerHandler", new ConnectorServerHandler());
+                        pipeline.addLast("ConnectorServerHandler", new ConnectorClientHandler());
                     }
                 });
 

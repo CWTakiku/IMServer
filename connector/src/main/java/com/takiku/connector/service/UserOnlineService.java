@@ -7,8 +7,11 @@ import com.takiku.connector.domain.ClientConnContext;
 import com.takiku.connector.handler.ConnectorTransferHandler;
 import com.takiku.userstatus.service.UserStatusService;
 import com.takiku.connector.service.impl.RedisUserStatusServiceImpl;
+import domain.ack.ClientAckWindow;
 import domain.ack.ServerAckWindow;
 import io.netty.channel.ChannelHandlerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import protobuf.PackProtobuf;
@@ -22,6 +25,9 @@ import java.util.List;
  */
 @Service
 public class UserOnlineService {
+
+    private static Logger logger = LoggerFactory.getLogger(UserOnlineService.class);
+
     @Autowired
     private ClientConnContext clientConnContext;
     @Autowired
@@ -34,9 +40,8 @@ public class UserOnlineService {
 
     private ServerAckWindow serverAckWindow;
 
-    public ServerAckWindow getServerAckWindow() {
-        return serverAckWindow;
-    }
+    private ClientAckWindow clientAckWindow;
+
 
     public UserOnlineService() {
         userStatusService = new RedisUserStatusServiceImpl();
@@ -52,7 +57,9 @@ public class UserOnlineService {
     public ClientConn userOnline(String userId,String token, ChannelHandlerContext ctx) {
         //get all offline msg and send
         ClientConn conn = new ClientConn(ctx);
+
         serverAckWindow = new ServerAckWindow(conn.getNetId(), 10, Duration.ofSeconds(5));
+        clientAckWindow = new ClientAckWindow(conn.getNetId(),5);
         List<Message> msgs = offlineService.pollOfflineMsg(userId,token);
         if (msgs != null) {
             msgs.forEach(msg -> {
@@ -69,6 +76,7 @@ public class UserOnlineService {
         //save connection
 
         conn.setUserId(userId);
+        logger.info("userOnline "+userId+" netId "+conn.getNetId());
         clientConnContext.addConn(conn);
 
         //user is online

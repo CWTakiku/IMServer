@@ -5,6 +5,7 @@ import com.takiku.connector.domain.ClientConn;
 import com.takiku.connector.domain.ClientConnContext;
 import com.takiku.connector.handler.ConnectorTransferHandler;
 import conn.Conn;
+import domain.ack.ClientAckWindow;
 import domain.ack.ServerAckWindow;
 import internal.InternalAck;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,6 +18,7 @@ import util.IdWorker;
 import util.WrapWriter;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -59,7 +61,7 @@ public class ConnectorToClientService {
 
     public void doReplyToClientOrTransferAndFlush(PackProtobuf.Reply reply) {
         logger.info("doReplyToClientOrTransferAndFlush");
-        sendMsg(reply.getUserId(), reply.getSerial(), cid -> reply);
+        sendMsg(reply.getToId(), reply.getSerial(), cid -> reply);
     }
 
     public void doShakeHandsToClientAndFlush(PackProtobuf.Reply reply) {
@@ -67,8 +69,9 @@ public class ConnectorToClientService {
     }
 
     public boolean sendMsg(String destId, Long serialId, Function<Serializable, Message> generateMsg) {
-        logger.info("sendMsg");
+
         Conn conn = clientConnContext.getConnByUserId(destId);
+
         if (conn == null) {
             ChannelHandlerContext ctx = ConnectorTransferHandler.getOneOfTransferCtx(System.currentTimeMillis());
           //  ctx.writeAndFlush(generateMsg.apply(ctx.channel().attr(Conn.NET_ID).get()));
@@ -83,8 +86,8 @@ public class ConnectorToClientService {
         }
     }
 
-    public void doAck(ChannelHandlerContext ctx, PackProtobuf.Ack ack){
-        Conn conn = clientConnContext.getConnByCtx(ctx);
+    public void doAck(PackProtobuf.Ack ack){
+        Conn conn = clientConnContext.getConnByUserId(ack.getFromId());
         if (conn == null){
 
         }else {
@@ -103,5 +106,11 @@ public class ConnectorToClientService {
         }
         WrapWriter.writeMsg(conn.getCtx(),msg);
         sendMsg(msg.getHead().getFromId(),msg.getSerial(),cid -> InternalAck.createAck(msg.getHead().getMsgId()));
+    }
+
+    public void offerChat(String fromId, String id, Long serial, ChannelHandlerContext ctx, Message copy, Consumer<Message> consumer) {
+        Conn conn = clientConnContext.getConnByUserId(fromId);
+        ClientAckWindow.offer(conn.getNetId(),id, serial,
+                ctx, copy, consumer);
     }
 }

@@ -1,7 +1,6 @@
 package com.takiku.connector.handler;
 
 import com.google.protobuf.Message;
-import com.takiku.connector.domain.ClientConn;
 import com.takiku.connector.domain.ClientConnContext;
 import com.takiku.connector.service.ConnectorToClientService;
 import com.takiku.connector.service.UserOnlineService;
@@ -11,7 +10,6 @@ import domain.ack.ClientAckWindow;
 import domain.ack.ServerAckWindow;
 import exception.IMException;
 import internal.InternalAck;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -19,24 +17,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import parse.AbstractPackParser;
-import po.BaseResponse;
 import po.ShakeHands;
 import po.UserCertification;
 import protobuf.PackProtobuf;
 import util.WrapWriter;
 
-import java.time.Duration;
 import java.util.function.Consumer;
-
-import static internal.Constants.SHAKE_HANDS_ACK_TYPE;
-import static internal.Constants.SHAKE_HANDS_STATUS_SUCCESS;
 
 /**
  * 处理客户端的消息
  */
 @Component
-public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message> {
-    private static Logger logger = LoggerFactory.getLogger(ConnectorServerHandler.class);
+public class ConnectorClientHandler extends SimpleChannelInboundHandler<Message> {
+    private static Logger logger = LoggerFactory.getLogger(ConnectorClientHandler.class);
     private FromClientParser fromClientParser;
 
     private static ConnectorToClientService connectorToClientService;
@@ -45,8 +38,8 @@ public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message>
 
     private static ConnectorRestService connectorRestService;
 
-    private ServerAckWindow serverAckWindow;
-    private ClientAckWindow clientAckWindow;
+
+
 
     @Autowired
     private ClientConnContext clientConnContext;
@@ -58,7 +51,7 @@ public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message>
     }
 
 
-    public ConnectorServerHandler() {
+    public ConnectorClientHandler() {
         fromClientParser = new FromClientParser();
     }
 
@@ -99,38 +92,34 @@ public class ConnectorServerHandler extends SimpleChannelInboundHandler<Message>
                 if (auth(m)) {
                     logger.info("userOnline");
                     userOnlineService.userOnline(m.getUserId(),m.getToken(), channelHandlerContext);
-                    clientAckWindow = new ClientAckWindow(5);
                     channelHandlerContext.writeAndFlush(InternalAck.createAck(m.getMsgId()));
                 }
             }));
 
-            register(PackProtobuf.Msg.class, ((m, channelHandlerContext) -> offerChat(m.getHead().getMsgId(), m.getSerial(),
+            register(PackProtobuf.Msg.class, ((m, channelHandlerContext) -> offerChat(m.getHead().getFromId(),m.getHead().getMsgId(), m.getSerial(),
                     m, channelHandlerContext, ignore -> {
                         connectorToClientService.doChatToClientOrTransferAndFlush(m);
                     }
                     ))
             );
-            register(PackProtobuf.Reply.class, ((m, channelHandlerContext) -> offerChat(m.getMsgId(), m.getSerial(),
+            register(PackProtobuf.Reply.class, ((m, channelHandlerContext) -> offerChat(m.getFromId(),m.getMsgId(), m.getSerial(),
                     m, channelHandlerContext, ignore ->
                             connectorToClientService.doReplyToClientOrTransferAndFlush(m))));
             register(PackProtobuf.Heart.class, ((m, channelHandlerContext) ->
                     AckHeart(channelHandlerContext, m)));
 
             register(PackProtobuf.Ack.class, ((m, channelHandlerContext) -> {
-                     connectorToClientService.doAck(channelHandlerContext,m);
+                     connectorToClientService.doAck(m);
             }));
         }
     }
 
-    private void offerChat(String id, Long serial, Message m, ChannelHandlerContext ctx, Consumer<Message> consumer) {
-        offer(id, serial, m, ctx, consumer);
+    private void offerChat(String fromId,String id, Long serial, Message m, ChannelHandlerContext ctx, Consumer<Message> consumer) {
+        offer(fromId,id, serial, m, ctx, consumer);
     }
 
-    private void offer(String id, Long serial, Message copy, ChannelHandlerContext ctx, Consumer<Message> consumer) {
-        if (clientAckWindow == null) {
-            throw new IMException("client not greet yet");
-        }
-        clientAckWindow.offer(id, serial,
+    private void offer(String fromId,String id, Long serial, Message copy, ChannelHandlerContext ctx, Consumer<Message> consumer) {
+        connectorToClientService.offerChat(fromId,id, serial,
                 ctx, copy, consumer);
     }
 

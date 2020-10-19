@@ -9,9 +9,9 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -27,19 +27,29 @@ import static util.WrapWriter.writeAck;
  */
 public class ClientAckWindow {
     private static Logger logger = LoggerFactory.getLogger(ClientAckWindow.class);
-
+    private static Map<Serializable, ClientAckWindow> windowsMap;
     private final int maxSize;
 
     private AtomicBoolean first;
     private boolean needMsgContinuous = false;
     private AtomicLong lastId;
     private ConcurrentMap<Long, ProcessMsgNode> notContinuousMap;
+    static {
+        windowsMap = new ConcurrentHashMap<>();
+    }
 
-    public ClientAckWindow(int maxSize) {
+
+    public ClientAckWindow(Serializable connectionId, int maxSize) {
         this.first = new AtomicBoolean(true);
         this.maxSize = maxSize;
         this.lastId = new AtomicLong(-1);
         this.notContinuousMap = new ConcurrentHashMap<>();
+        windowsMap.put(connectionId,this);
+    }
+
+    public static   CompletableFuture<Void> offer(Serializable connectionId,String msgId, Long serial,
+                                          ChannelHandlerContext ctx, Message receivedMsg, Consumer<Message> processFunction) {
+        return windowsMap.get(connectionId).offer(msgId,serial,ctx,receivedMsg,processFunction);
     }
 
     /**
@@ -48,7 +58,7 @@ public class ClientAckWindow {
      * @param receivedMsg
      * @param processFunction
      */
-    public CompletableFuture<Void> offer(String msgId, Long serial,
+    private   CompletableFuture<Void> offer(String msgId, Long serial,
                                          ChannelHandlerContext ctx, Message receivedMsg, Consumer<Message> processFunction) {
         logger.info("client serial " + serial);
         if (isRepeat(serial)) {
@@ -116,7 +126,7 @@ public class ClientAckWindow {
     }
 
 
-    private boolean isRepeat(Long msgId) {
+    private  boolean isRepeat(Long msgId) {
         return msgId <= lastId.get();
     }
 
